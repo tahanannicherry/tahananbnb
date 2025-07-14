@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demonstration Web Page - English Version</title>
+
+    <style>
+        /* ------------------------------------- */
+        /* CSS starts here */
+        /* ------------------------------------- */
+
+        /* Basic reset for cross-browser consistency */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Define new colors based on the logo image */
+        :root {
+            --body-bg-color: #B8A896; /* Light beige from the logo */
+            --house-border-color: #734B28; /* Brown from the logo outline/text */
+            --inner-house-fill-color: #B8A896; /* Same as body for seamless house interior */
+            --accordion-header-color: #fff7e8; /* Keep original light beige for headers */
+            --accordion-active-color: #482E1D; /* Keep original dark brown for active headers */
+            --accordion-content-bg: #f9f9f9; /* Keep original light background for content */
+            --border-thickness: 3px; /* Thickness of the house outline */
+            --roof-height-ratio: 0.6; /* Determines how pointy the roof is (height/width ratio) */
+            --house-body-horizontal-padding: 10px; /* Padding for the house body to align with roof base */
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: var(--body-bg-color); /* Use the new beige color */
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            direction: ltr;
+            text-align: left;
+        }
+
+        /* ------------------------------------- */
+        /* House Wrapper - Overall container for the house */
+        /* ------------------------------------- */
+        .house-wrapper {
+            width: 100%;
+            max-width: 400px; /* Overall max width for the house */
+            margin: 30px auto 10px; /* Center the house and provide space */
+            position: relative;
+            display: flex; /* To stack roof and body vertically */
+            flex-direction: column;
+            overflow: hidden; /* Helps clip any minor overlaps or rendering artifacts */
+        }
+
+        /* ------------------------------------- */
+        /* House Roof Section */
+        /* ------------------------------------- */
+        .house-roof {
+            position: relative; /* For absolutely positioning .header-visual inside */
+            width: 100%;
+            padding-bottom: calc(var(--roof-height-ratio) * 100%);
+            background-color: var(--house-border-color); /* This is the outer brown border color for the roof */
+            clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+            z-index: 2; /* Ensures roof appears above the body */
+            overflow: hidden; /* Essential to clip image/content within the roof shape */
+        }
+
+        /* Header Visual (Image Carousel) - now directly inside the roof part */
+        .house-roof .header-visual {
+            position: absolute;
+            top: var(--border-thickness);
+            left: var(--border-thickness);
+            right: var(--border-thickness);
+            bottom: var(--border-thickness); /* Inset by border thickness to create the internal border effect */
+            background-color: var(--inner-house-fill-color);
+            background-size: contain; /* Image will appear fully, maintaining its proportions */
+            background-repeat: no-repeat; /* To ensure the image does not repeat */
+            background-position: center;
+            transition: background-image 0.5s ease-in-out;
+            clip-path: inherit;
+            border-radius: 0;
+            padding-bottom: 0;
+        }
+
+        /* ------------------------------------- */
+        /* Navigation Arrows (Original circular arrows) */
+        /* ------------------------------------- */
+        .nav-arrow {
+            background-color: rgba(0, 0, 0, 0.6);
+            color: #fff;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.3s ease;
+            z-index: 10;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .nav-arrow:hover {
+            background-color: rgba(0, 0, 0, 0.8);	
+        }
+
+        .left-arrow { left: 5px; }
+        .right-arrow { right: 5px; }
+        .left-arrow::before { content: '◀'; transform: translateX(2px); }
+        .right-arrow::before { content: '▶'; transform: translateX(-2px); }
+
+        /* ------------------------------------- */
+        /* New Corner Navigation Areas (Triangular and Beige) */
+        /* ------------------------------------- */
+        .corner-click-area {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 35%;
+            background-color: #AA9885;
+            color: var(--house-border-color);
+            font-size: 35px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.3s ease;
+            z-index: 9;
+            overflow: hidden;
+        }
+
+        .corner-click-area:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+	
+        .left-corner-click {
+            left: 0;
+            clip-path: polygon(63% 0%, 0% 108%, 63% 100%);
+            transform: translateX(-5%);
+        }
+
+        .right-corner-click {
+            right: 0;
+            clip-path: polygon(37% 0%, 100% 108%, 37% 100%);
+            transform: translateX(5%);
+        }
+
+        .left-corner-click::before { content: '◀'; }
+        .right-corner-click::before { content: '▶'; }
+
+        /* ------------------------------------- */
+        /* House Body Section (Accordion Container) */
+        /* ------------------------------------- */
+        .house-body {
+            width: calc(100% - (2 * var(--house-body-horizontal-padding)));
+            margin: calc(-1 * var(--border-thickness)) auto 0 auto;
+            background-color: var(--body-bg-color);
+            border: var(--border-thickness) solid var(--house-border-color);
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .house-body .container {
+            width: 100%;
+            max-width: none;
+            background-color: transparent;
+            border-radius: 0;
+            box-shadow: none;
+            padding: 0;
+        }
+
+        /* ------------------------------------- */
+        /* Accordion Section - Styles largely retained */
+        /* ------------------------------------- */
+        .accordion { padding: 15px; }
+        .accordion-item { margin-bottom: 10px; }
+        .accordion-item:last-child { margin-bottom: 0; }
+
+        .accordion-header {
+            width: 100%;
+            background-color: var(--accordion-header-color);
+            color: #000;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 8px;
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1rem;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .accordion-header:hover,
+        .accordion-header.active {
+            background-color: var(--accordion-active-color);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            color: #fff;
+        }
+
+        .accordion-header .icon {
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+            transform: rotate(0deg);
+            width: 20px;
+            text-align: center;
+        }
+
+        .accordion-header .icon::before { content: '\2304'; display: block; line-height: 1; }
+        .accordion-header.active .icon { transform: rotate(180deg); }
+
+        .accordion-content {
+            background-color: var(--accordion-content-bg);
+            padding: 0 20px;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out, padding 0.3s ease-out;
+            border-radius: 0 0 8px 8px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+
+        .accordion-content.show { padding: 15px 20px; }
+        .accordion-content p { margin-bottom: 10px; line-height: 1.6; }
+        .accordion-content p:last-child { margin-bottom: 0; }
+        .accordion-content ul, .accordion-content ol { list-style-position: inside; padding-left: 5px; margin-bottom: 10px; }
+        .accordion-content li { margin-bottom: 8px; line-height: 1.6; }
+        .accordion-content a { color: #007bff; text-decoration: none; }
+        .accordion-content a:hover { text-decoration: underline; }
+        .accordion-content ul ul { margin-top: 5px; margin-left: 20px; list-style-type: circle; }
+        
+        /* New class for the welcome heading */
+        .welcome-heading {
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: var(--house-border-color);
+            margin-bottom: 15px;
+        }
+
+        /* ------------------------------------- */
+        /* TAHANAN Text (new element) */
+        /* ------------------------------------- */
+        .tahanan-text {
+            text-align: center;
+            margin-top: 10px;
+            color: var(--house-border-color);
+            font-size: 1.5em;
+            font-weight: bold;
+            letter-spacing: 0.1em;
+        }
+
+        /* ------------------------------------- */
+        /* Media Query for larger screens */
+        /* ------------------------------------- */
+        @media (min-width: 768px) {
+            body { padding: 40px; }
+            .house-wrapper { max-width: 700px; margin-top: 40px; }
+            .accordion { padding: 20px; }
+            .accordion-header { font-size: 1.1rem; padding: 18px 25px; }
+            .accordion-content.show { padding: 20px 25px; }
+            .tahanan-text { font-size: 2em; }
+        }
+    </style>
+</head>
+<body>
+    <div class="house-wrapper">
+        <!-- House Roof Section -->
+        <div class="house-roof">
+            <div class="header-visual">
+                <div class="nav-arrow left-arrow"></div>
+                <div class="nav-arrow right-arrow"></div>
+                <div class="corner-click-area left-corner-click"></div>
+                <div class="corner-click-area right-corner-click"></div>
+            </div>
+        </div>
+
+        <!-- House Body Section (for Accordion) -->
+        <div class="house-body">
+            <div class="container">
+                <div class="accordion">
+                    <div class="accordion-item">
+                        <button class="accordion-header">
+                            <span>About</span>
+                            <span class="icon"></span>
+                        </button>
+                        <div class="accordion-content">
+                            <p class="welcome-heading">🌿Welcome You to our Tahanan🌿</p>
+                            <p>It’s with great pride that we open the doors to our thoughtfully designed condomonium — a space where comfort meets convenience in the heart of Iloilo City. Every detail has been carefully curated to make sure you feel right at home, whether you’re here for a weekend getaway, a work trip, or a longer stay.</p>
+                            
+                            <p><strong>🛏 The Space:</strong></p>
+                            <ul>
+                                <li>1 cozy bedroom with a comfortable bed and clean linens.</li>
+                                <li>Private balcony – enjoy your morning coffee with a view.</li>
+                                <li>Smart TV with Netflix for relaxing nights.</li>
+                                <li>Fully equipped kitchen with basic cookware.</li>
+                                <li>Clean bathroom with hot and cold shower.</li>
+                            </ul>
+
+                            <p><strong>🏊 Amenities:</strong></p>
+                            <ul>
+                                <li>Access to a swimming pool, fitness center access subject to building rules (we’ll guide you!) and children’s playground.</li>
+                                <li>Fast Wi-Fi (ideal for remote work or streaming).</li>
+                                <li>Air conditioning and essential toiletries provided.</li>
+                            </ul>
+
+                            <p><strong>Building Features:</strong></p>
+                            <ul>
+                                <li>Elevator access.</li>
+                                <li>Lobby or reception area.</li>
+                                <li>24/7 security or concierge.</li>
+                                <li>CCTV and surveillance systems common areas.</li>
+                            </ul>
+
+                            <p><strong>🧺 Convenience & Services within the building:</strong></p>
+                            <ul>
+                                <li>Laundry services.</li>
+                                <li>Convenience store (7/11).</li>
+                                <li>Water refill station.</li>
+                            </ul>
+
+                            <p><strong>🅿 Parking & Transportation:</strong></p>
+                            <ul>
+                                <li>Street Parking estimated roundly 50-75php.</li>
+                            </ul>
+
+                            <p><strong>🛟 Safety & Accessibility:</strong></p>
+                            <ul>
+                                <li>Fire alarms and sprinkler systems.</li>
+                                <li>Fire exits and evacuation plans.</li>
+                                <li>Emergency generator / backup power.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <button class="accordion-header">
+                            <span>Address</span>
+                            <span class="icon"></span>
+                        </button>
+                        <div class="accordion-content">
+                            <p>We are located at Avida Towers Atria, Tower 1 Storeys 2, Donato Pison Avenue, Mandurriao, Iloilo City. Philippines</p>
+                            <p><strong>📍 Location Highlights:</strong></p>
+                            <ul>
+                                <li>3 min walk to Festive Walk Mall and nightlife.</li>
+                                <li>5 min drive to SM City Iloilo and Atria Park District.</li>
+                                <li>Easy access to restaurants, cafes, banks, and public transport.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <button class="accordion-header">
+                            <span>Payment</span>
+                            <span class="icon"></span>
+                        </button>
+                        <div class="accordion-content">
+                           <p><strong>GCash:</strong></p
+						   <p>Account Name: CH***Y M** E.</p>
+						   <p>Number: 09454913838</p>
+						   </ul>
+						   <p><strong>Bank Transfer:</strong></p>
+						   <p>Bank: RCBC</p>
+						   <p>Account Name: Christy N.Escote</p>
+						   <p>Account Number: 9025933081</p>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <button class="accordion-header">
+                            <span>Contact Us</span>
+                            <span class="icon"></span>
+                        </button>
+                        <div class="accordion-content">
+                            <p>📝 Instagram: Tahananbnb</p>
+                            <p>📇 WhatsApp: 09454913838</p>
+                            <p>📱 Cellphone number: 09453960990</p>
+                            <p>📝 Email Address: <a href="mailto:tahananbnb01@gmail.com">tahananbnb01@gmail.com</a></p>
+                            <p>🔖 or send us direct Message on our Facebook Page <a href="https://www.facebook.com/share/12GED2vnv7J/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer">here</a>.</p>
+                        </div>
+                    </div>
+
+                    <div class="accordion-item">
+                        <button class="accordion-header">
+                            <span>Layers of Life, Culture and History of Iloilo City</span>
+                            <span class="icon"></span>
+                        </button>
+                        <div class="accordion-content">
+                            <ol>
+                                <li>
+                                    <strong>The Iloilo River Esplanade</strong>
+                                    <p>Things to Do:</p>
+                                    <ul>
+                                        <li>Walk, jog, bike, or relax in the shaded areas along the river.</li>
+                                        <li>Enjoy free fitness sessions like Zumba and Tai Chi, especially early mornings or around sunset.</li>
+                                        <li>Try a boat ride (about ₱85 per person for 30 minutes).</li>
+                                        <li>Dine or grab coffee in nearby spots like Smallville, Boardwalk, and Atria.</li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <strong>The Sunset Boulevard in Iloilo City:</strong>
+                                    <p>Why Visit?</p>
+                                    <ul>
+                                        <li>Stunning sunset views over the river—beautiful for photographers, couples, families, joggers, walkers, and cyclists.</li>
+                                        <li>Less traffic congestion by offering a scenic alternate route toward Oton, Antiqueo, and southern Iloilo.</li>
+                                        <li>Recreational vibe with walking, biking, bird-watching, fishing, and enjoying the ambiance.</li>
+                                    </ul>
+                                </li>
+                                <li><strong>Molo Church (St. Anne Parish):</strong> – A beautiful Gothic-style church known as the “Feminist Church” for its all-female saints on the altar.</li>
+                                <li><strong>Jaro Cathedral (National Shrine of Our Lady of the Candles):</strong> – A historic church with a grand staircase and a separate bell tower across the street.</li>
+                                <li><strong>Museo Iloilo:</strong> – A small but rich museum showcasing Iloilo’s pre-colonial and colonial history.</li>
+                                <li><strong>La Paz Public Market:</strong> – Home of the original La Paz Batchoy, a must-try Ilonggo noodle soup.</li>
+                                <li><strong>Tatoy’s Manokan & Breakthrough Restaurant:</strong> – Best for fresh seafood, native chicken, and beachside dining.</li>
+                                <li>
+                                    <strong>Culture & Events:</strong>
+                                    <ul>
+                                        <li>Dinagyang Festival (January) – One of the biggest festivals in the Philippines, honoring the Santo Niño with dazzling tribal dance parades.</li>
+                                    </ul>
+                                </li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAHANAN Text -->
+    <p class="tahanan-text">TAHANAN</p>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const accordionHeaders = document.querySelectorAll('.accordion-header');
+            accordionHeaders.forEach(header => {
+                header.addEventListener('click', () => {
+                    const accordionItem = header.parentElement;
+                    const accordionContent = accordionItem.querySelector('.accordion-content');
+                    const wasActive = header.classList.contains('active');
+                    
+                    document.querySelectorAll('.accordion-header.active').forEach(activeHeader => {
+                        if (activeHeader !== header) {
+                            activeHeader.classList.remove('active');
+                            const content = activeHeader.nextElementSibling;
+                            content.style.maxHeight = content.scrollHeight + "px";
+                            content.offsetWidth; // Force reflow
+                            content.style.maxHeight = "0";
+                            content.classList.remove('show');
+                        }
+                    });
+
+                    header.classList.toggle('active');
+                    accordionContent.classList.toggle('show');
+
+                    if (accordionContent.classList.contains('show')) {
+                        accordionContent.style.maxHeight = accordionContent.scrollHeight + "px";
+                        accordionContent.addEventListener('transitionend', function handler() {
+                            if (accordionContent.classList.contains('show')) {
+                                accordionContent.style.maxHeight = 'none';
+                            }
+                            accordionContent.removeEventListener('transitionend', handler);
+                        }, { once: true });
+                    } else {
+                        accordionContent.style.maxHeight = accordionContent.scrollHeight + "px";
+                        requestAnimationFrame(() => {
+                           requestAnimationFrame(() => {
+                               accordionContent.style.maxHeight = "0";
+                           });
+                        });
+                    }
+                });
+            });
+
+            const headerVisual = document.querySelector('.header-visual');
+            const allNavArrows = document.querySelectorAll('.nav-arrow, .corner-click-area');
+            const backgroundImages = [
+                'url("https://i.postimg.cc/VLt5WQBs/1.jpg")',
+                'url("https://i.postimg.cc/PqCx3PBD/2.jpg")',
+                'url("https://i.postimg.cc/JnJh8S74/3.jpg")',
+				'url("https://i.postimg.cc/kGmggwDN/4.jpg")',
+                'url("https://i.postimg.cc/1Xr5n6Nk/5.jpg")',
+                'url("https://i.postimg.cc/kX75rj0q/6.jpg")',
+				'url("https://i.postimg.cc/jdvSRHTN/7.jpg")',
+                'url("https://i.postimg.cc/y8b6Z7k8/8.jpg")',
+                'url("https://i.postimg.cc/63dBgRz8/9.jpg")',
+				'url("https://i.postimg.cc/T1fT6wHC/10.jpg")',
+                'url("https://i.postimg.cc/pTtHfrxR/11.jpg")',
+                'url("https://i.postimg.cc/HsLC4fGc/12.jpg")',
+				'url("https://i.postimg.cc/KYtX8bTV/13.jpg")',
+                'url("https://i.postimg.cc/85bqLbtm/14.jpg")',
+                'url("https://i.postimg.cc/ZnKXHyQt/15.jpg")'
+            ];
+            let currentImageIndex = 0;
+            let slideshowInterval;
+            function updateHeaderBackground() { headerVisual.style.backgroundImage = backgroundImages[currentImageIndex]; }
+            function nextImage() { currentImageIndex = (currentImageIndex + 1) % backgroundImages.length; updateHeaderBackground(); }
+            function prevImage() { currentImageIndex = (currentImageIndex - 1 + backgroundImages.length) % backgroundImages.length; updateHeaderBackground(); }
+            function resetSlideshowInterval() { clearInterval(slideshowInterval); slideshowInterval = setInterval(nextImage, 2500); }
+            allNavArrows.forEach(arrow => {
+                arrow.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (arrow.classList.contains('left-arrow') || arrow.classList.contains('left-corner-click')) { prevImage(); }
+                    else if (arrow.classList.contains('right-arrow') || arrow.classList.contains('right-corner-click')) { nextImage(); }
+                    resetSlideshowInterval();
+                });
+            });
+            updateHeaderBackground();
+            resetSlideshowInterval();
+        });
+    </script>
+</body>
+</html>
